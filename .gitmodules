@@ -1,0 +1,3 @@
+[submodule "TransportationProblemSolver"]
+	path = TransportationProblemSolver
+	url = ../TransportationProblemSolver.git
