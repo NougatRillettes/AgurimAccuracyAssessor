@@ -33,25 +33,23 @@ for measfile_name in args.measfiles:
     
     countsorted = sorted(counts.items(),reverse=True)
     x = [65]
-    y = [0]
-    acc = 0
+    y = [1]
+    acc = total
     for (diff,count) in countsorted:
-        x.append(diff)
+        x.append(diff+1)
         y.append(acc/total)
-        acc += count
-        if diff == 0:
-            break
-        x.append(diff)
+        acc -= count
+        x.append(diff+1)
         y.append(acc/total)
     plt.plot(x,y,label=measfile_name)
 
 
 #mpl.rc('figure',figsize=(size,size))
 
-plt.xticks(range(0,66,5))
+plt.xticks(range(0,65,4))
 plt.grid()
-plt.legend()
-#plt.xscale('log')
+plt.legend(loc='lower right')
+#plt.yscale('logit')
 
 #plt.ylabel("Ground truth prefixes")
 #plt.xlabel("Outputed prefixes")
