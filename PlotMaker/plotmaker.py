@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import argparse
 from os.path import basename
+from pprint import pprint
+from itertools import groupby
+from operator import itemgetter
 
 flows = set()
 counts = {}
@@ -55,6 +58,15 @@ plt.xticks(range(len(flows)),flows,rotation='vertical')
 plt.yticks(range(len(flows)),flows)
 plt.grid()
 
+isocost = {}
+for i in range(65):
+    isocost[i] = {}
+
+for (y,fi) in enumerate(flows):
+    for (x,fo) in enumerate(flows):
+        cost = max(sum(fi)-sum(fo),0)
+        isocost[cost][x] = y
+
 costx = []
 costy = []
 costs = []
@@ -65,7 +77,7 @@ for (y,fi) in enumerate(flows):
             costx.append(x)
             costy.append(y)
 
-plt.scatter(x=costx,y=costy,s=costs,marker='+',color='red',alpha=0.5,label='Cost (height)')
+#plt.scatter(x=costx,y=costy,s=costs,marker='+',color='red',alpha=0.5,label='Cost (height)')
 
 plt.ylabel("Ground truth prefixes")
 plt.xlabel("Outputed prefixes")
@@ -75,6 +87,14 @@ tag = "\n" + args.subtitle
 plt.plot([-1,len(flows)],[-1,len(flows)],color='black',linestyle='-',linewidth=0.25)
 plt.title("Approximation of ground truth for each byte" + tag)
 #plt.legend(('circle','cross'),("Number of bytes (area)","Cost (height)"))
+
+pprint(isocost)
+for (c,dic) in isocost.items():
+    sortedlist = sorted(dic.items())
+    subsortedlists = [list(map(itemgetter(1), g)) for (k, g) in groupby(enumerate(sortedlist),lambda t: t[0]-t[1][0])]
+    for ss in subsortedlists:
+        plt.plot([k for (k,v) in ss],[v for (k,v) in ss])
+
 plt.legend(loc='lower right',scatterpoints=1)
 plt.savefig('.'.join(basename(args.measfile).split('.')[:-1]) +".png",dpi=80)
 if args.show:
