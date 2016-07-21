@@ -12,6 +12,8 @@ argparser = argparse.ArgumentParser(description="Generates a graphical represent
 argparser.add_argument("measfiles",action='store',metavar="comparision.meas",help="The comparision files",nargs='+')
 #argparser.add_argument("subtitle",action='store',help="A subtitle for the plot",nargs='?',default='')
 argparser.add_argument("-s","--show",action='store_true',help="Also displays the plot")
+argparser.add_argument("-t","--type",choices=['cdf','cost'],action='store',default='cdf',help="Set the curve type (efault: cdf)")
+argparser.add_argument("-o",help="Name of file to save to.",default="out.png")
 args = argparser.parse_args()
 
 
@@ -21,7 +23,7 @@ def tuparse(s):
 
 for measfile_name in args.measfiles:
     measfile = open(measfile_name)
-    counts = {}
+    counts = {65: 0}
     for l in list(measfile)[2:]:
         words = l.split(' ')
         ti = tuparse(words[0])
@@ -29,34 +31,52 @@ for measfile_name in args.measfiles:
         key = max(sum(ti)-sum(to),0)
         counts[key] = counts.get(key,0) + int(words[2])
     
-    total = sum(counts.values()) 
     
-    countsorted = sorted(counts.items(),reverse=True)
-    x = [65]
-    y = [1]
-    acc = total
+    countsorted = sorted(counts.items())
+    totalbytes = sum(counts.values())
+    
+    x = []
+    y = []
+    acc = 0
     for (diff,count) in countsorted:
-        x.append(diff+1)
-        y.append(acc/total)
-        acc -= count
-        x.append(diff+1)
-        y.append(acc/total)
+        if diff != 0:
+            x.append(diff)
+            y.append(acc/totalbytes)
+        if args.type == 'cdf':
+            acc += count
+        else:
+            acc += count*diff
+        x.append(diff)
+        y.append(acc/totalbytes)
     plt.plot(x,y,label=measfile_name)
 
 
 #mpl.rc('figure',figsize=(size,size))
 
 plt.xticks(range(0,65,4))
+plt.xlim([0,64])
 plt.grid()
-plt.legend(loc='lower right')
+if args.type == 'cdf':
+    plt.legend(loc='lower right')
+else:
+    plt.legend(loc='upper left')
 #plt.yscale('logit')
 
-#plt.ylabel("Ground truth prefixes")
-#plt.xlabel("Outputed prefixes")
+if args.type == 'cdf':
+    plt.ylabel("Proportion of bytes with an offset least or equal")
+else:
+    plt.ylabel("Cost caused by bytes with an offset least or equal")
+plt.xlabel("Prefix length offset")
 
 #tag = "\n" + args.subtitle
     
-#plt.title("" + tag)
-#plt.savefig('.'.join(basename(args.measfile).split('.')[:-1]) +"_curve.png",dpi=80)
+if args.type == 'cdf':
+    plt.title("Cumulative distribution of prefixes offset")
+else:
+    plt.title("Cumulative cost by prefixes offset")
+
+file_suffix = 'cdf' if args.type == 'cdf' else 'cost_curve'
+
+plt.savefig(args.o,dpi=80)
 if args.show:
     plt.show()
