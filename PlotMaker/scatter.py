@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import argparse
 from os.path import basename
+from matplotlib import rcParams
+
+rcParams.update({'figure.autolayout': True})
+
 
 flows = set()
 counts = {}
@@ -60,10 +64,9 @@ costy = []
 costs = []
 for (y,fi) in enumerate(flows):
     for (x,fo) in enumerate(flows):
-        if y > x:
-            costs.append(150*(max(sum(fi)-sum(fo),0)**2/64**2))
-            costx.append(x)
-            costy.append(y)
+        costs.append(150*(max(sum(fi)-sum(fo),0)**2/64**2))
+        costx.append(x)
+        costy.append(y)
 
 plt.scatter(x=costx,y=costy,s=costs,marker='+',color='red',alpha=0.5,label='Cost (height)')
 
@@ -76,6 +79,6 @@ plt.plot([-1,len(flows)],[-1,len(flows)],color='black',linestyle='-',linewidth=0
 plt.title("Approximation of ground truth for each byte" + tag)
 #plt.legend(('circle','cross'),("Number of bytes (area)","Cost (height)"))
 plt.legend(loc='lower right',scatterpoints=1)
-plt.savefig('.'.join(basename(args.measfile).split('.')[:-1]) +".png",dpi=80)
+plt.savefig('.'.join(basename(args.measfile).split('.')[:-1]) +".pdf",dpi=1200)
 if args.show:
     plt.show()

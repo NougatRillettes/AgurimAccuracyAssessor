@@ -12,8 +12,8 @@ argparser = argparse.ArgumentParser(description="Generates a graphical represent
 argparser.add_argument("measfiles",action='store',metavar="comparision.meas",help="The comparision files",nargs='+')
 #argparser.add_argument("subtitle",action='store',help="A subtitle for the plot",nargs='?',default='')
 argparser.add_argument("-s","--show",action='store_true',help="Also displays the plot")
-argparser.add_argument("-t","--type",choices=['cdf','cost'],action='store',default='cdf',help="Set the curve type (efault: cdf)")
-argparser.add_argument("-o",help="Name of file to save to.",default="out.png")
+argparser.add_argument("-t","--type",choices=['cdf','cost'],action='store',default='cdf',help="Set the curve type (default: cdf)")
+argparser.add_argument("-o",metavar="out.pdf",help="Name of file to save to.",default="out.pdf")
 args = argparser.parse_args()
 
 
@@ -77,6 +77,6 @@ else:
 
 file_suffix = 'cdf' if args.type == 'cdf' else 'cost_curve'
 
-plt.savefig(args.o,dpi=80)
+plt.savefig(args.o,dpi=1200)
 if args.show:
     plt.show()
